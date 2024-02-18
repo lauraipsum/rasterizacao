@@ -2,7 +2,7 @@ def ler_arquivo_ppm(nome_arquivo):
     with open(nome_arquivo, 'r') as arquivo:
         linhas = arquivo.readlines()
 
-        # Verifica se o arquivo é do tipo P2
+        # verifica se é P2
         if linhas[0].strip() != 'P2':
             print("Formato de arquivo inválido. Deve ser do tipo P2.")
             return None
@@ -11,15 +11,14 @@ def ler_arquivo_ppm(nome_arquivo):
         largura, altura = map(int, linhas[1].split())
         valor_maximo = int(linhas[2])
 
-        # Lê os valores dos pixels
+        # le o valor de cada pixel da img
         matriz = []
         for linha in linhas[3:]:
             valores = linha.split()
             matriz.append([int(valor) for valor in valores])
             
-        print(matriz)
+        #print(matriz)
         return largura, altura, valor_maximo, matriz
-
 
 def salvar_arquivo_ppm(nome_arquivo, largura, altura, valor_maximo, matriz):
     with open(nome_arquivo, 'w') as arquivo:
@@ -31,11 +30,31 @@ def salvar_arquivo_ppm(nome_arquivo, largura, altura, valor_maximo, matriz):
             linha_str = ' '.join(str(valor) for valor in linha)
             arquivo.write(f"{linha_str}\n")
 
+def negativo(nome_arquivo):
+    largura, altura, valor_maximo, matriz = ler_arquivo_ppm('exemplo.ppm') 
+    matriz_negativo = [ 
+                       [valor_maximo - pixel # s = (L-1) - r , transformacao negativa
+                        for pixel in linha] 
+                       for linha in matriz  
+                       ]       
+    
+    # Salva a matriz negativa em um novo arquivo .ppm
+    novo_nome_arquivo = nome_arquivo.replace('.ppm', '_negativo.ppm')
+    salvar_arquivo_ppm(novo_nome_arquivo, largura, altura, valor_maximo, matriz_negativo)
+    
+def threshold(nome_arquivo, limite):
+    largura, altura, valor_maximo, matriz = ler_arquivo_ppm('exemplo.ppm') 
+    
+    matriz_threshold = [
+                        [0 if pixel <= limite else valor_maximo 
+                         for pixel in linha] 
+                        for linha in matriz
+                        ]
 
-# Lê o arquivo .ppm P2
-largura, altura, valor_maximo, matriz = ler_arquivo_ppm('exemplo.ppm')
+    novo_nome_arquivo = nome_arquivo.replace('.ppm', f'_threshold_{limite}.ppm')
+    salvar_arquivo_ppm(novo_nome_arquivo, largura, altura, valor_maximo, matriz_threshold)
 
-# Realiza operações na matriz se necessário
 
-# Salva a matriz em um novo arquivo .ppm P2
-salvar_arquivo_ppm('nova_imagem.ppm', largura, altura, valor_maximo, matriz)
+
+negativo('exemplo.ppm')
+threshold('exemplo.ppm', limite=125)
